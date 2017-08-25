@@ -1,13 +1,14 @@
 import os
+import json
 from flask import Flask, request, redirect, url_for
 from werkzeug.utils import secure_filename
-from functions import test
+import functions
  
 app = Flask(__name__)      
  
-@app.route('/')
+@app.route('/test')
 def home():
-  return test(' Name')
+   return json.dumps({'success':True}), 200, {'ContentType':'application/json'} 
 
 UPLOAD_FOLDER = './uploads'
 ALLOWED_EXTENSIONS = set(['txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif', 'csv'])
@@ -19,7 +20,6 @@ def allowed_file(filename):
 
 @app.route('/file', methods=['POST'])
 def upload_file():
-    print('here bro')
     if request.method == 'POST':
         # check if the post request has the file part
         if 'file' not in request.files:
@@ -32,18 +32,26 @@ def upload_file():
             flash('No selected file')
             return redirect(request.url)
         if file and allowed_file(file.filename):
-            filename = secure_filename(file.filename)
+            # filename = secure_filename(file.filename)
+            filename = 'data.csv'
             file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-            return redirect('/')
-    return '''
-    <!doctype html>
-    <title>Upload new File</title>
-    <h1>Upload new File</h1>
-    <form method=post enctype=multipart/form-data>
-      <p><input type=file name=file>
-         <input type=submit value=Upload>
-    </form>
-    '''
+            global FYTech
+            FYTech = functions.initiateDf()
+            return json.dumps({'success':True}), 200, {'ContentType':'application/json'} 
+
+@app.route('/makeplot', methods=['GET'])
+def make_plot():
+    functions.generateTable(FYTech)
+    return json.dumps({'success':True}), 200, {'ContentType':'application/json'} 
+
+
+@app.route('/makeplot2', methods=['GET'])
+def make_plot2():
+    functions.pipePlots(FYTech)
+    return json.dumps({'success':True}), 200, {'ContentType':'application/json'} 
+
+
+
 
  
 if __name__ == '__main__':
