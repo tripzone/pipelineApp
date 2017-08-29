@@ -17,7 +17,7 @@ yearBegin = '2018 - 01'
 yearEnd = '2018 - 13'
 dateTarget = '2017-12-01'
 
-def summaryTable(df):
+def generateTable(df):
 	def computeRow(df, SL, stage, period):
 		result = np.zeros(4)
 		temp = df[(df['Close Period'] == period) & (df['line'] == SL) & (df['stage'] == stage)]
@@ -59,7 +59,6 @@ def summaryTable(df):
 
 	temp = df[df['Close Period'] <= thisPeriod]
 	print('outputted to file')
-
 def pipePlots(df):
 
 	# FIRST GRAPH
@@ -187,11 +186,10 @@ def pipePlots(df):
 	from IPython.display import Image
 	Image('./output/90DayAll.png')
 
-
-def keyDeals(dfTech ):
+def keyDeals(df, dfTech ):
 	# TABLE
 	keyDealsRead = pd.read_csv("uploads/keydeals.csv").set_index('Id')
-	keyDeals = keyDealsRead.join(FY)
+	keyDeals = keyDealsRead.join(df)
 	keyDeals['90DayWindow?'] = np.where(keyDeals['Close Period']< NinetyDayEnd, 'TRUE', '' )
 	# output90Day = output[output['Close Period'] < NinetyDayEnd]
 	# keyDeals.dropna(inplace=True)
@@ -274,11 +272,11 @@ def keyDeals(dfTech ):
 		width=900,
 	)
 
-	fig = go.Figure(data=data, layout=layout)
-	py.image.save_as(fig, filename='./output/90DaySelected.png')
+	# fig = go.Figure(data=data, layout=layout)
+	# py.image.save_as(fig, filename='./output/90DaySelected.png')
 
-	# from IPython.display import Image
-	# Image('./output/90DaySelected.png')
+	from IPython.display import Image
+	Image('./output/keyDeals.png')
 	# py.iplot(fig, filename='grouped-bar')
 
 def slPlot(df):
@@ -305,8 +303,7 @@ def slPlot(df):
 
 	fig = go.Figure(data=data, layout=layout)
 	py.image.save_as(fig, filename='./output/SlsPlot.png')
-	# from IPython.display import Image
-
+	from IPython.display import Image
 def dealSizePlot(df):
 	#DEAL SIZE
 
@@ -329,8 +326,7 @@ def dealSizePlot(df):
 	)
 	fig = go.Figure(data=data, layout=layout)
 	py.image.save_as(fig, filename='./output/dealSizePlot.png')
-	# from IPython.display import Image
-
+	from IPython.display import Image
 def closeReasonPlot(df):
 	closeTier = df[(df["stage"]==-2) | (df["stage"]==-1) | (df["stage"]==6)].copy()
 	closeTier = closeTier[closeTier['Close Period'] < NinetyDayEnd]
@@ -341,9 +337,8 @@ def closeReasonPlot(df):
 	colors = cl.scales['3']['qual']['Pastel2']
 	data = [go.Pie(labels=labels, values=values,pull=.05, hole=.05, marker=dict(colors=colors, line=dict(width=2)))]
 	fig = go.Figure(data=data)
-	# py.image.save_as(fig, filename='./output/closeReasonPlot.png')
-	# from IPython.display import Image
-
+	py.image.save_as(fig, filename='./output/closeReasonPlot.png')
+	from IPython.display import Image
 def averageAgePlot(df):
 	#AVERAGE AGE
 	averageAge = (df[(df["stage"]!= -2) & (df["stage"]!= -1) & (df["stage"]!=6)]).copy()
@@ -412,11 +407,11 @@ def averageAgePlot(df):
 	)
 
 	fig = go.Figure(data=data, layout=layout)
+	fig = go.Figure(data=data, layout=layout)
 	py.image.save_as(fig, filename='./output/ageTierPlot.png')
-
 def initiateDf():
 	plotly.tools.set_credentials_file(username='kasra.zahir', api_key='p04mrpvEHUM1994TQbbP')
-	global FY
+
 	FY = pd.read_csv("./uploads/data.csv").set_index('Id#')
 
 	columns = [
@@ -435,6 +430,7 @@ def initiateDf():
 		'Number of Days since Last Updated'
 	   ]
 
+
 	FY = FY[columns]
 	# ed = FYTechAll[['Close Date','Close Period', 'Tech Service Line','Sales Stage', 'Total Estimated Revenue','Created', 'Last Updated', 'Number of Days since Last Updated']].copy()
 	FY.rename(columns={'Total Estimated Revenue': 'TR', 'Tech Service Line':'line', 'Sales Stage':'stage'}, inplace=True)
@@ -450,23 +446,25 @@ def initiateDf():
 
 def initiateTech(FY):
 	# FY = initiateDf()
-	global FYTech
-	FYTech = (FY[FY['Service Line Group'] == 'Technology'][FY['Close Period'] >= yearBegin]).copy()
-	return FYTech
+	FYTechAll = FY[FY['Service Line Group'] == 'Technology'][FY['Close Period'] >= yearBegin].copy()
+	return FYTechAll
 
-plots = [
- {"type":"pipe", "function": pipePlots, "category": "area"},
- {"type":"sl", "function": slPlot, "category": "bar"},
- {"type":"kK", "function": dealSizePlot, "category" : "pie"},
- {"type":"closeReason", "function": closeReasonPlot, "category": "pie"},
- {"type":"averageAge", "function": averageAgePlot,  "category": "bar"},
- {"type":"summary", "function": summaryTable, "category": "table" },
- {"type":"keyDeals", "function": keyDeals,  "category": "table"}
-]
+def plotIt(type, data):
+	if (type == 'pipe'):
+		pipePlots(data)
+	elif (type == 'sl'):
+		slPlot(data)
+	elif (type == 'dealsize'):
+		dealSizePlot(data)
+	elif (type == 'closeReason'):
+		closeReasonPlot(data)
+	elif (type == 'averageAge'):
+		averageAgePlot(data)
+	return({succes:False, error:'invalid plot type'})
 
-FY = initiateDf()
-global FYTech
-FYTech = initiateTech(FY)
-
-def plotIt(type):
-	list(filter(lambda x : x['type'] == type, plots))[0]['function'](FYTech)
+def tableOut(type, data, FY):
+	if (type == 'newOpp'):
+		generateTable(data)
+	elif (type == 'keyDeals'):
+		keyDeals(FY, data)
+		return({succes:False, error:'invalid plot type'})
