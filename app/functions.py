@@ -76,6 +76,7 @@ def pipePlots(df):
 	result = result.reindex_axis(sorted(result.columns, reverse=True), axis=1)
 
 	resultFY = (result[result.index <= yearEnd])
+	# resultFY.to_csv('1.pipeline.csv')
 
 	target = pd.read_csv("uploads/target.csv").set_index('date')
 	targetLocal = (target[target.index <= yearEnd])
@@ -294,6 +295,7 @@ def keyDeals(dfTech ):
 
 def slPlot(df):
 	SLTotal = df[(df['stage'] != [-2]) & (df['stage'] != [-1]) &(df['Close Period'] < NinetyDayEnd)].groupby('line').sum()['TR']
+	# SLTotal.to_csv('2.sls.csv')
 
 	data = [
 		go.Bar(
@@ -326,6 +328,8 @@ def dealSizePlot(df):
 
 	sizetierGroup = sizeTier.groupby('size').sum()['TR']
 	sizetierGroup = sizetierGroup.reindex([tiers[0], tiers[1], tiers[2], tiers[3]])
+	# sizetierGroup.to_csv('3.sizeTiers.csv')
+
 	labels = sizetierGroup.index
 	values = sizetierGroup.values
 	colors = cl.scales['4']['qual']['Pastel2']
@@ -342,6 +346,8 @@ def closeReasonPlot(df):
 	closeTier = closeTier[closeTier['Close Period'] < NinetyDayEnd]
 	closeTier.replace({"stage": {6.0:'Sold', -2:'Abandoned' , -1:'Lost'}}, inplace= True)
 	closeTierGroup = closeTier.groupby('stage').sum()['TR']
+	# closeTierGroup.to_csv('4.closeReason.csv')
+
 	labels = closeTierGroup.index
 	values = closeTierGroup.values
 	colors = cl.scales['3']['qual']['Pastel2']
@@ -358,8 +364,9 @@ def averageAgePlot(df):
 	now = datetime.now()
 	averageAge['age'] = (now - averageAge['Created'])/np.timedelta64(1, 'D')
 	averageAge.replace({"stage": {0.0:'Identifying', 1:'Contacting' , 2:'Qualifying',3:'Developing' , 4:'Proposed', 5:'Verbal Commit'}}, inplace= True)
-
 	averageAgeGroup = averageAge.groupby('stage').mean()['age']
+	# averageAgeGroup.to_csv('5.averageAge.csv')
+
 	data = [
 		go.Bar(
 			x=averageAgeGroup.index, # assign x as the dataframe column 'x'
@@ -393,6 +400,8 @@ def averageAgePlot(df):
 
 	ageTierGroup = ageTier.groupby('ageTier').sum()['TR']
 	ageTierGroup = ageTierGroup.reindex([tiers[0], tiers[1], tiers[2], tiers[3]])
+	# ageTierGroup.to_csv('6.ageTier.csv')
+	
 	data = [
 		go.Bar(
 			x=ageTierGroup.index, # assign x as the dataframe column 'x'
@@ -472,8 +481,11 @@ plots2 = [
 ]
 
 plots = [
- {"type":"sl", "function": slPlot, "category": "bar"},
+ # {"type":"sl", "function": slPlot, "category": "bar"},
  {"type":"summary", "function": summaryTable, "category": "table" },
+ {"type":"summary2", "function": summaryTable, "category": "pie" },
+  {"type":"summary3", "function": summaryTable, "category": "bar" },
+
 ]
 
 global FY

@@ -1,18 +1,27 @@
 import { observable, action } from "mobx";
 
-export class var1 {
-	@observable id = 0;
-	@observable name = "";
+class plot {
+	@observable loaded = false;
+	@observable type = "";
+	@observable category = "";
 
-	constructor(name, id) {
-		this.id = id;
-		this.name = name;
+	constructor(type, category) {
+		this.loaded = false;
+		this.type = type;
+		this.category = category;
 	}
 }
 
-export let count = observable({
-	id: 0
+export let plotState = observable({
+	"loaded" : false,
+	"plots" : []
 });
-count.inc = function() {
-	this.id = this.id + 1;
+plotState.init = function(plotTypes) {
+	this.loaded = true;
+	plotTypes.forEach(x=>{
+		this.plots.push(new plot(x.type, x.category))
+	})
 };
+plotState.loadPlot = function(type){
+	this.plots[this.plots.findIndex(x=>x.type ==type)].loaded = true;
+}

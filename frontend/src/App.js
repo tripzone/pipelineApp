@@ -1,15 +1,18 @@
 import React, { Component } from "react";
 import { observer } from "mobx-react";
-import { var1, count } from "./state";
+import { plotState } from "./state";
 import "./App.css";
 
 async function plotIt(type) {
-	fetch("http://127.0.0.1:5000/makeplot", {
+	return fetch("http://127.0.0.1:5000/makeplot", {
 		method: "GET",
 		headers: new Headers({
 			"plot-type": type
 		})
-	}).then(x => x.json());
+	}).then(x => {
+			return x.json()
+		}
+		);
 }
 
 async function getPlotTypes() {
@@ -19,14 +22,23 @@ async function getPlotTypes() {
 	return response.json();
 }
 
+function loadPlot(plot) {
+	plotState.loadPlot(plot.type)
+
+}
+
+function loadPlotTypes(plotTypes){
+	plotState.init(plotTypes)
+}
+
 @observer
 class App extends Component {
 	componentWillMount() {
 		const requests = async () => {
 			const plotTypes = await getPlotTypes();
+			loadPlotTypes(plotTypes)
 			plotTypes.forEach(async x => {
-				console.log(x.type);
-				plotIt(x.type);
+				plotIt(x.type).then(y=>{y.success ? loadPlot(x) : console.log('nada')});
 			});
 			return { done: "yes" };
 		};
@@ -37,14 +49,12 @@ class App extends Component {
 	}
 
 	render() {
-		const oss = new var1("name", 3);
-		count.inc();
+
 
 		return (
 			<div className="App">
 				ola
-				{oss.name}
-				{count.id}
+				{plotState.loaded ? "yup" : "nope"}
 			</div>
 		);
 	}
