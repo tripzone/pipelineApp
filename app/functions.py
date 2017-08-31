@@ -6,7 +6,7 @@ import plotly.graph_objs as go
 import plotly.plotly as py
 import colorlover as cl
 import cufflinks as cf
-import xlwt
+import xlrd, openpyxl
 import plotly
 
 periodDate = datetime(2017, 7, 30, 0, 0)
@@ -61,7 +61,6 @@ def summaryTable(df):
 	print('outputted to file')
 
 def pipePlots(df):
-
 	# FIRST GRAPH
 	dfGroup = df.groupby(['Close Period','stage'])['TR'].sum().reset_index()
 	xVal=dfGroup['Close Period'].values
@@ -88,7 +87,7 @@ def pipePlots(df):
 	targetFig = targetLocal.iplot(kind='scatter', mode='lines', asFigure=True, dash=['dash'], width=[4], name = ["forecast"])
 	for i, trace in enumerate(targetFig['data']):
 		trace['line']['shape'] = 'spline'
-		trace['name'] = 'FY18 NR targer'
+		trace['name'] = 'FY18 NSR targer'
 
 	figure = resultFY.iplot(kind='area', fill=True, filename='stacked-area', colors=color_scale_blues,asFigure=True, opacity=0.8)
 	figure['layout']['paper_bgcolor']='rgba(0,0,0,0)',
@@ -104,9 +103,6 @@ def pipePlots(df):
 
 	figure['data'].extend(targetFig['data'])
 	py.image.save_as(figure, filename='./output/allTech.png')
-
-	from IPython.display import Image
-	Image('./output/allTech.png')
 
 	# SECOND GRAPH
 	result = (result[result.index < NinetyDayEnd])
@@ -179,13 +175,11 @@ def pipePlots(df):
 	targetFig = targetHere.iplot(kind='scatter', mode='markers', asFigure=True, dash=['dash'], width=[4], name = ["forecast"])
 	for i, trace in enumerate(targetFig['data']):
 		trace['line']['shape'] = 'spline'
-		trace['name'] = 'FY18 NR targer'
+		trace['name'] = 'FY18 NSR targer'
 
 	fig = go.Figure(data=data, layout=layout)
 	fig['data'].extend(targetFig['data'])
 	py.image.save_as(fig, filename='./output/90DayAll.png')
-	from IPython.display import Image
-	Image('./output/90DayAll.png')
 
 
 def keyDeals(dfTech ):
@@ -193,13 +187,33 @@ def keyDeals(dfTech ):
 	keyDealsRead = pd.read_csv("uploads/keydeals.csv").set_index('Id')
 	keyDeals = keyDealsRead.join(FY)
 	keyDeals['90DayWindow?'] = np.where(keyDeals['Close Period']< NinetyDayEnd, 'TRUE', '' )
-	# output90Day = output[output['Close Period'] < NinetyDayEnd]
 	# keyDeals.dropna(inplace=True)
-	keyDealsGroup = keyDeals.groupby('Category').sum()
 	keyDealsClean = keyDeals[['Rational', 'Selected By','stage', 'Account', 'Opportunity', 'TR', 'line', 'Close Date', 'Category','90DayWindow?']].sort_values(by='Selected By')
 	# keyDealsClean = keyDeals[['Selected By','Rational', 'Category']].sort_values(by='Selected By')
-
 	keyDealsClean.to_csv('./output/keydealsoutput.csv')
+
+	keyDealsGroup = keyDeals.groupby('Category').sum()['TR']
+	data1 = [
+    	go.Bar(
+	        x=keyDealsGroup.index,
+	        y=keyDealsGroup.values,
+	        width = 0.5,
+	        marker=dict(
+	            color='#bcd4d1',
+	            line=dict(
+	                color='#629a95',
+	                width=2,
+	        )
+	        ),
+	    )
+	]
+
+	layout = go.Layout(
+	    width=700,
+	)
+
+	fig1 = go.Figure(data=data1, layout=layout)
+	py.image.save_as(fig1, filename='./output/keyDealsRational.png')
 
 	#PLOT
 	ed = keyDealsRead.join(dfTech)
@@ -275,15 +289,12 @@ def keyDeals(dfTech ):
 	)
 
 	fig = go.Figure(data=data, layout=layout)
-	py.image.save_as(fig, filename='./output/90DaySelected.png')
+	py.image.save_as(fig, filename='./output/90DayKeyDeals.png')
 
-	# from IPython.display import Image
-	# Image('./output/90DaySelected.png')
-	# py.iplot(fig, filename='grouped-bar')
 
 def slPlot(df):
 	SLTotal = df[(df['stage'] != [-2]) & (df['stage'] != [-1]) &(df['Close Period'] < NinetyDayEnd)].groupby('line').sum()['TR']
-	# SLTotal = SLTotal.iloc[::-1]
+
 	data = [
 		go.Bar(
 			x=SLTotal.index, # assign x as the dataframe column 'x'
@@ -298,18 +309,14 @@ def slPlot(df):
 			),
 		)
 	]
-
 	layout = go.Layout(
 		width=700,
 	)
-
 	fig = go.Figure(data=data, layout=layout)
 	py.image.save_as(fig, filename='./output/SlsPlot.png')
-	# from IPython.display import Image
 
 def dealSizePlot(df):
 	#DEAL SIZE
-
 	tiers = ['0M-1M', '1M-5M', '5M-10M', '10M+']
 
 	sizeTier = df[df['Close Period'] < NinetyDayEnd].copy()
@@ -322,14 +329,13 @@ def dealSizePlot(df):
 	labels = sizetierGroup.index
 	values = sizetierGroup.values
 	colors = cl.scales['4']['qual']['Pastel2']
-	data = [go.Pie(labels=labels, values=values,pull=.05, hole=.05, marker=dict(colors=colors, line=dict(width=2)))]
 
+	data = [go.Pie(labels=labels, values=values,pull=.05, hole=.05, marker=dict(colors=colors, line=dict(width=2)))]
 	layout = go.Layout(
 		legend=dict(traceorder="normal")
 	)
 	fig = go.Figure(data=data, layout=layout)
 	py.image.save_as(fig, filename='./output/dealSizePlot.png')
-	# from IPython.display import Image
 
 def closeReasonPlot(df):
 	closeTier = df[(df["stage"]==-2) | (df["stage"]==-1) | (df["stage"]==6)].copy()
@@ -341,8 +347,8 @@ def closeReasonPlot(df):
 	colors = cl.scales['3']['qual']['Pastel2']
 	data = [go.Pie(labels=labels, values=values,pull=.05, hole=.05, marker=dict(colors=colors, line=dict(width=2)))]
 	fig = go.Figure(data=data)
-	# py.image.save_as(fig, filename='./output/closeReasonPlot.png')
-	# from IPython.display import Image
+	py.image.save_as(fig, filename='./output/closeReasonPlot.png')
+
 
 def averageAgePlot(df):
 	#AVERAGE AGE
@@ -368,14 +374,12 @@ def averageAgePlot(df):
 			),
 		)
 	]
-
 	layout = go.Layout(
 		width=700,
 		yaxis=dict(
 		title='Days',
 		)
 	)
-
 	fig = go.Figure(data=data, layout=layout)
 	py.image.save_as(fig, filename='./output/averageAgePlot.png')
 
@@ -403,27 +407,24 @@ def averageAgePlot(df):
 			),
 		)
 	]
-
 	layout = go.Layout(
 		width=700,
 		yaxis=dict(
 		title='Days',
 		)
 	)
-
 	fig = go.Figure(data=data, layout=layout)
 	py.image.save_as(fig, filename='./output/ageTierPlot.png')
 
 def initiateDf():
 	plotly.tools.set_credentials_file(username='kasra.zahir', api_key='p04mrpvEHUM1994TQbbP')
 	global FY
-	FY = pd.read_csv("./uploads/data.csv").set_index('Id#')
+	FY = pd.read_excel("./uploads/data.xlsx").set_index('Id#')
 
 	columns = [
-		'Tech Service Line',
-		'90 day',
 		'Service',
 		'Service Line Group',
+		'Service Line',
 		'Sales Stage',
 		'Close Date',
 		'Close Period',
@@ -436,25 +437,31 @@ def initiateDf():
 	   ]
 
 	FY = FY[columns]
-	# ed = FYTechAll[['Close Date','Close Period', 'Tech Service Line','Sales Stage', 'Total Estimated Revenue','Created', 'Last Updated', 'Number of Days since Last Updated']].copy()
-	FY.rename(columns={'Total Estimated Revenue': 'TR', 'Tech Service Line':'line', 'Sales Stage':'stage'}, inplace=True)
+	FY.rename(columns={'Total Estimated Revenue': 'TR', 'Sales Stage':'stage'}, inplace=True)
 
-	FY['TR'] = FY['TR'].str.replace(r'[$,]', '').astype('float')
+	# FY['TR'] = FY['TR'].str.replace(r'[$,]', '').astype('float')
 	FY['stage'] = FY['stage'].map(lambda x: str(x)[:2])
 	FY['stage'] = FY['stage'].astype(float)
 	FY['stage'] = FY['stage'].replace(8, -2)
 	FY['stage'] = FY['stage'].replace(7, -1)
 	FY['Created'] = pd.to_datetime(FY['Created'])
 	FY['Last Updated'] = pd.to_datetime(FY['Last Updated'])
+	FY.loc[FY['Service Line']=='Oracle', 'line']='Oracle'
+	FY.loc[FY['Service Line']=='SAP', 'line']='SAP'
+	FY.loc[FY['Service Line']=='Digital Customer', 'line']='DC'
+	FY.loc[FY['Service Line']=='Analytics & Information Mgmt', 'line']='AIM'
+	FY.loc[FY['Service Line']=='Digital Integration', 'line']='DI'
+	FY.loc[FY['Service Line']=='Application ManagementServices', 'line']='AMS'
+	FY.loc[FY['Service Line'].str.split('-').str[0] =='TSA ', 'line']='TS&A'
+
 	return FY
 
 def initiateTech(FY):
-	# FY = initiateDf()
 	global FYTech
 	FYTech = (FY[FY['Service Line Group'] == 'Technology'][FY['Close Period'] >= yearBegin]).copy()
 	return FYTech
 
-plots = [
+plots2 = [
  {"type":"pipe", "function": pipePlots, "category": "area"},
  {"type":"sl", "function": slPlot, "category": "bar"},
  {"type":"kK", "function": dealSizePlot, "category" : "pie"},
@@ -464,9 +471,16 @@ plots = [
  {"type":"keyDeals", "function": keyDeals,  "category": "table"}
 ]
 
+plots = [
+ {"type":"sl", "function": slPlot, "category": "bar"},
+ {"type":"summary", "function": summaryTable, "category": "table" },
+]
+
+global FY
 FY = initiateDf()
 global FYTech
 FYTech = initiateTech(FY)
+
 
 def plotIt(type):
 	list(filter(lambda x : x['type'] == type, plots))[0]['function'](FYTech)

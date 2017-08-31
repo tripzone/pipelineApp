@@ -16,7 +16,7 @@ def home():
    return json.dumps({'success':True}), 200, {'ContentType':'application/json'}
 
 UPLOAD_FOLDER = './uploads'
-ALLOWED_EXTENSIONS = set(['txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif', 'csv'])
+ALLOWED_EXTENSIONS = set(['xlsx'])
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 def allowed_file(filename):
@@ -38,7 +38,7 @@ def upload_file():
 			return redirect(request.url)
 		if file and allowed_file(file.filename):
 			# filename = secure_filename(file.filename)
-			filename = 'data.csv'
+			filename = 'data.xlsx'
 			file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
 			FY = fn.initiateDf()
 			fn.initiateTech(FY)
@@ -62,5 +62,6 @@ def plot_types():
 	print(a)
 	return jsonify(a), 200, {'ContentType':'application/json'}
 
+
 if __name__ == '__main__':
-  app.run()
+  app.run(threaded=True)
