@@ -53,8 +53,8 @@ class App extends Component {
 
 		return (
 			<div className="App">
-				ola
-				{plotState.loaded ? "yup" : "nope"}
+				{plotState.loaded ? "LOADED" : "NOT"}
+				{plotState.loaded ? plotState.plots.map(x=>{return x.loaded ? "L" : "N"}) : "nope"}
 			</div>
 		);
 	}
