@@ -191,9 +191,9 @@ def keyDeals(dfTech ):
 	# keyDeals.dropna(inplace=True)
 	keyDealsClean = keyDeals[['Rational', 'Selected By','stage', 'Account', 'Opportunity', 'TR', 'line', 'Close Date', 'Category','90DayWindow?']].sort_values(by='Selected By')
 	# keyDealsClean = keyDeals[['Selected By','Rational', 'Category']].sort_values(by='Selected By')
-	keyDealsClean.to_csv('./output/keydealsoutput.csv')
+	# keyDealsClean.to_csv('./output/keydealsoutput.csv')
 
-	keyDealsGroup = keyDeals.groupby('Category').sum()['TR']
+	keyDealsGroup = keyDeals.groupby('Category').count()['TR']
 	data1 = [
     	go.Bar(
 	        x=keyDealsGroup.index,
@@ -321,10 +321,10 @@ def dealSizePlot(df):
 	#DEAL SIZE
 	tiers = ['0M-1M', '1M-5M', '5M-10M', '10M+']
 
-	sizeTier = df[df['Close Period'] < NinetyDayEnd].copy()
-	sizeTier['size'] = np.where(sizeTier['TR']<1000000, tiers[0],
-								np.where(sizeTier['TR']<5000000, tiers[1],
-										np.where(sizeTier['TR']<10000000, tiers[2], tiers[3])))
+	sizeTier = df[(df['stage'] != [-2]) & (df['stage'] != [-1]) & (df['Close Period'] < NinetyDayEnd)].copy()
+	sizeTier['size'] = np.where(sizeTier['TR']<=1000000, tiers[0],
+								np.where(sizeTier['TR']<=5000000, tiers[1],
+										np.where(sizeTier['TR']<=10000000, tiers[2], tiers[3])))
 
 	sizetierGroup = sizeTier.groupby('size').sum()['TR']
 	sizetierGroup = sizetierGroup.reindex([tiers[0], tiers[1], tiers[2], tiers[3]])
@@ -388,15 +388,15 @@ def averageAgePlot(df):
 		)
 	)
 	fig = go.Figure(data=data, layout=layout)
-	py.image.save_as(fig, filename='./output/averageAgePlot.png')
+	# py.image.save_as(fig, filename='./output/averageAgePlot.png')
 
 	#AGE TIER
 	ageTier = averageAge
 
 	tiers = ["0 - 3 Weeks", "3 - 6 Weeks", "6 weeks - 3 months", "3 months +"]
-	ageTier['ageTier'] = np.where(ageTier['Number of Days since Last Updated']<21, tiers[0],
-								np.where(ageTier['Number of Days since Last Updated']<42, tiers[1],
-										np.where(ageTier['Number of Days since Last Updated']<91, tiers[2], tiers[3])))
+	ageTier['ageTier'] = np.where(ageTier['Number of Days since Last Updated']<22, tiers[0],
+								np.where(ageTier['Number of Days since Last Updated']<43, tiers[1],
+										np.where(ageTier['Number of Days since Last Updated']<93, tiers[2], tiers[3])))
 
 	ageTierGroup = ageTier.groupby('ageTier').sum()['TR']
 	ageTierGroup = ageTierGroup.reindex([tiers[0], tiers[1], tiers[2], tiers[3]])
@@ -481,18 +481,16 @@ plots2 = [
 ]
 
 plots = [
- # {"type":"sl", "function": slPlot, "category": "bar"},
+ # {"type":"ageTier", "function": averageAgePlot, "category": "bar"},
  {"type":"summary", "function": summaryTable, "category": "table" },
  {"type":"summary2", "function": summaryTable, "category": "pie" },
-  {"type":"summary3", "function": summaryTable, "category": "bar" },
-
+ {"type":"summary3", "function": summaryTable, "category": "bar" },
 ]
 
 global FY
 FY = initiateDf()
 global FYTech
 FYTech = initiateTech(FY)
-
 
 def plotIt(type):
 	list(filter(lambda x : x['type'] == type, plots))[0]['function'](FYTech)

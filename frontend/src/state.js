@@ -7,6 +7,7 @@ class plot {
 
 	constructor(type, category) {
 		this.loaded = false;
+		this.error = false;
 		this.type = type;
 		this.category = category;
 	}
@@ -24,4 +25,7 @@ plotState.init = function(plotTypes) {
 };
 plotState.loadPlot = function(type){
 	this.plots[this.plots.findIndex(x=>x.type ==type)].loaded = true;
+}
+plotState.loadError = function(type){
+	this.plots[this.plots.findIndex(x=>x.type ==type)].error = true;
 }
