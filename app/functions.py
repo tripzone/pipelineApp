@@ -426,6 +426,7 @@ def averageAgePlot(df):
 	py.image.save_as(fig, filename='./output/ageTierPlot.png')
 
 def initiateDf():
+	# plotly.tools.set_credentials_file(username='kasrazahir', api_key='hvEWprL4cY9DDtgkhp3U')
 	plotly.tools.set_credentials_file(username='kasra.zahir', api_key='p04mrpvEHUM1994TQbbP')
 	global FY
 	FY = pd.read_excel("./uploads/data.xlsx").set_index('Id#')
@@ -470,21 +471,21 @@ def initiateTech(FY):
 	FYTech = (FY[FY['Service Line Group'] == 'Technology'][FY['Close Period'] >= yearBegin]).copy()
 	return FYTech
 
-plots2 = [
- {"type":"pipe", "function": pipePlots, "category": "area"},
- {"type":"sl", "function": slPlot, "category": "bar"},
- {"type":"kK", "function": dealSizePlot, "category" : "pie"},
- {"type":"closeReason", "function": closeReasonPlot, "category": "pie"},
- {"type":"averageAge", "function": averageAgePlot,  "category": "bar"},
- {"type":"summary", "function": summaryTable, "category": "table" },
- {"type":"keyDeals", "function": keyDeals,  "category": "table"}
+plots5 = [
+ {"type":"pipe", "function": pipePlots, "category": "area", "desc": "Full Pipeline"},
+ {"type":"sl", "function": slPlot, "category": "bar", "desc": "Service Lines"},
+ {"type":"dealSize", "function": dealSizePlot, "category" : "pie", "desc": "Deal Size Tiers"},
+ {"type":"closeReason", "function": closeReasonPlot, "category": "pie", "desc": "Persuit Outcomes"},
+ {"type":"averageAge", "function": averageAgePlot,  "category": "bar",  "desc": "Entry Age"},
+ {"type":"summary", "function": summaryTable, "category": "table", "desc": "Summary Table" },
+ {"type":"keyDeals", "function": keyDeals,  "category": "table", "desc": "Key Deals"}
 ]
 
 plots = [
- # {"type":"ageTier", "function": averageAgePlot, "category": "bar"},
- {"type":"summary", "function": summaryTable, "category": "table" },
- {"type":"summary2", "function": summaryTable, "category": "pie" },
- {"type":"summary3", "function": summaryTable, "category": "bar" },
+ {"type":"summary", "function": summaryTable, "category": "table", "desc": "Full Pipeline" },
+ {"type":"summary2", "function": summaryTable, "category": "pie", "desc": "Persuit Outcomes" },
+ {"type":"summary3", "function": summaryTable, "category": "area" , "desc": "Summary Table" },
+ {"type":"ageTier", "function": averageAgePlot, "category": "area", "desc": "Key Deals"},
 ]
 
 global FY

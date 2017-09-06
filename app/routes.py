@@ -28,13 +28,13 @@ def upload_file():
 	if request.method == 'POST':
 		# check if the post request has the file part
 		if 'file' not in request.files:
-			flash('No file part')
+			print('No file part')
 			return redirect(request.url)
 		file = request.files['file']
 		# if user does not select file, browser also
 		# submit a empty part without filename
 		if file.filename == '':
-			flash('No selected file')
+			print('No selected file')
 			return redirect(request.url)
 		if file and allowed_file(file.filename):
 			# filename = secure_filename(file.filename)
@@ -51,14 +51,15 @@ def make_plot():
 		try:
 			fn.plotIt(type)
 			return json.dumps({'success':True}), 200, {'ContentType':'application/json'}
-		except:
-			return json.dumps({'success':False, 'error':'No file uploaded'}), 200, {'ContentType':'application/json'}
+		except Exception as e:
+			return json.dumps({'success':False, 'error':'No file uploaded '+str(e)}), 200, {'ContentType':'application/json'}
 	else:
 		return json.dumps({'success':False, 'error':'Invalid plot type: '+type}), 200, {'ContentType':'application/json'}
 
 @app.route('/plottypes', methods=['GET'])
 def plot_types():
-	a = list(map(lambda x: {"type":x['type'], "category":x['category']}, fn.plots))
+	plotsCopy = fn.plots
+	a = list(map(lambda x: {"type":x['type'], "category":x['category'], "desc":x['desc']}, fn.plots))
 	print(a)
 	return jsonify(a), 200, {'ContentType':'application/json'}
 

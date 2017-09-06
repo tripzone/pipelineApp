@@ -3,5 +3,9 @@
 }
 
 .loading_plot {
-  height: 150px;
+  height: 200px;
+}
+
+.loading_main {
+	margin:20px;
 }
