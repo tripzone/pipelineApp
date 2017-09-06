@@ -5,3 +5,4 @@
 app/uploads/
 app/output/
 .ipynb_checkpoints/
+node_modules/
