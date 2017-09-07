@@ -1,10 +1,12 @@
 import React from "react";
-import { BrowserRouter as Router, Route, Link } from "react-router-dom";
+import { Router, Route, Link } from "react-router-dom";
 import App from "./App";
 import PlotLoad from "./PlotLoad"
+import { createBrowserHistory } from 'history'
+
 
 const Routes = () =>
-	<Router>
+	<Router history={createBrowserHistory()}>
 		<div>
 			<Route exact path="/" component={App} />
 			<Route path="/load" component={PlotLoad} />
