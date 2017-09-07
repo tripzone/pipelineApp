@@ -32,11 +32,31 @@ class App extends React.Component {
 
     render() {
         return (
-        	<div>
-        	   	<input type="file" onChange={(e) => this.handleFileUpload(e, this.state.file)} />
-   				<button onClick={e => this.handleSubmit(this.state.file)} >upload</button>
-   				<Link to="/load">Home</Link>
+        	<div className="page">
+    			<div className="row">
 
+				</div>
+        		<div className="row ">
+        			<div className="center offset-s1 offset-l3 offset-m2 col s10 m8 l6 teal lighten-5">
+        				<div className="flow-text">
+							CRM Extract
+						</div>
+							<div className="file-field input-field ">
+							  <div className="btn">
+							    <span>File</span>
+							    <input type="file" onChange={(e) => this.handleFileUpload(e, this.state.file)} />
+							  </div>
+							  <div className="file-path-wrapper">
+							    <input className="file-path validate" type="text" />
+							  </div>
+							</div>
+        			</div>
+        	   	</div>
+   				<div className="row">
+   					<div className="center">
+   						<button className="waves-effect waves-light btn-large" onClick={e => this.handleSubmit(this.state.file)} >upload</button>
+   					</div>
+   				</div>
         	</div>
 
 

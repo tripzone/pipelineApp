@@ -109,7 +109,7 @@ class App extends Component {
 			)
 		} else if (plotState.loaded) {
 			return (
-				<div className="loading_main">
+				<div className="page loading_main">
 					<div className="row">
 						<div className="flow-text center">Generating Plots</div>
 					</div>
