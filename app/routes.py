@@ -1,7 +1,6 @@
 import os
 import json
-from flask import Flask, request, redirect, url_for, jsonify
-from werkzeug.utils import secure_filename
+from flask import Flask, request, redirect, jsonify
 import functions as fn
 from flask_cors import CORS
 
@@ -63,6 +62,18 @@ def plot_types():
 	print(a)
 	return jsonify(a), 200, {'ContentType':'application/json'}
 
+# Everything not declared before (not a Flask route / API endpoint)...
+@app.route('/<path:path>')
+def route_frontend(path):
+    # ...could be a static file needed by the front end that
+    # doesn't use the `static` path (like in `<script src="bundle.js">`)
+    file_path = os.path.join(app.static_folder, path)
+    if os.path.isfile(file_path):
+        return send_file(file_path)
+    # ...or should be handled by the SPA's "router" in front end
+    else:
+        return "no good bro"
+
 
 if __name__ == '__main__':
-  app.run(threaded=True)
+  app.run(host='0.0.0.0', debug=True, port=5000)

@@ -501,10 +501,9 @@ plots3= [
 #  {"type":"ageTier", "function": averageAgePlot, "category": "area", "desc": "Key Deals"},
 ]
 
-global FY
-FY = initiateDf()
-global FYTech
-FYTech = initiateTech(FY)
-
 def plotIt(type):
+	global FY
+	FY = initiateDf()
+	global FYTech
+	FYTech = initiateTech(FY)
 	list(filter(lambda x : x['type'] == type, plots))[0]['function'](FYTech)
