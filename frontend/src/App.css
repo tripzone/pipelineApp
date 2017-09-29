@@ -9,3 +9,13 @@
 .page {
 	margin:20px;
 }
+
+.menu-button {
+	position: absolute;
+    left: 15px;
+    top: 45px;
+}
+
+.page-header {
+	font-size: 3em;
+}

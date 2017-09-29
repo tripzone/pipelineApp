@@ -9,10 +9,10 @@ import cufflinks as cf
 import xlrd, openpyxl
 import plotly
 
-periodDate = datetime(2017, 7, 30, 0, 0)
+periodDate = datetime(2017, 8, 27, 0, 0)
 beginningDate = datetime(2017, 6, 4, 0, 0)
-thisPeriod = '2018 - 03'
-NinetyDayEnd = '2018 - 08'
+thisPeriod = '2018 - 04'
+NinetyDayEnd = '2018 - 09'
 yearBegin = '2018 - 01'
 yearEnd = '2018 - 13'
 dateTarget = '2017-12-01'
@@ -50,11 +50,12 @@ def summaryTable(df):
 	except:
 		pass
 
-	for line in df['line'].unique():
+
+	for line in np.sort(df['line'].unique()):
 		a = computeNewOp(df, line)
-		b = computeRow(df, line, 6.0, thisPeriod)
-		c = computeRow(df, line, -1.0, thisPeriod)
-		d = computeRow(df, line, -2.0, thisPeriod)
+		b = computeRow(df, line, 6, thisPeriod)
+		c = computeRow(df, line, -1, thisPeriod)
+		d = computeRow(df, line, -2, thisPeriod)
 		printIt(line,[a,b,c,d])
 
 	temp = df[df['Close Period'] <= thisPeriod]
@@ -88,7 +89,7 @@ def pipePlots(df):
 	targetFig = targetLocal.iplot(kind='scatter', mode='lines', asFigure=True, dash=['dash'], width=[4], name = ["forecast"])
 	for i, trace in enumerate(targetFig['data']):
 		trace['line']['shape'] = 'spline'
-		trace['name'] = 'FY18 NSR targer'
+		trace['name'] = 'FY18 NSR target'
 
 	figure = resultFY.iplot(kind='area', fill=True, filename='stacked-area', colors=color_scale_blues,asFigure=True, opacity=0.8)
 	figure['layout']['paper_bgcolor']='rgba(0,0,0,0)',
@@ -176,7 +177,7 @@ def pipePlots(df):
 	targetFig = targetHere.iplot(kind='scatter', mode='markers', asFigure=True, dash=['dash'], width=[4], name = ["forecast"])
 	for i, trace in enumerate(targetFig['data']):
 		trace['line']['shape'] = 'spline'
-		trace['name'] = 'FY18 NSR targer'
+		trace['name'] = 'FY18 NSR target'
 
 	fig = go.Figure(data=data, layout=layout)
 	fig['data'].extend(targetFig['data'])
@@ -211,6 +212,7 @@ def keyDeals(dfTech ):
 
 	layout = go.Layout(
 	    width=700,
+	    font=dict(size=15)
 	)
 
 	fig1 = go.Figure(data=data1, layout=layout)
@@ -313,6 +315,7 @@ def slPlot(df):
 	]
 	layout = go.Layout(
 		width=700,
+		font=dict(size=18),
 	)
 	fig = go.Figure(data=data, layout=layout)
 	py.image.save_as(fig, filename='./output/SlsPlot.png')
@@ -336,7 +339,8 @@ def dealSizePlot(df):
 
 	data = [go.Pie(labels=labels, values=values,pull=.05, hole=.05, marker=dict(colors=colors, line=dict(width=2)))]
 	layout = go.Layout(
-		legend=dict(traceorder="normal")
+		legend=dict(traceorder="normal"),
+		font=dict(size=15),
 	)
 	fig = go.Figure(data=data, layout=layout)
 	py.image.save_as(fig, filename='./output/dealSizePlot.png')
@@ -352,7 +356,10 @@ def closeReasonPlot(df):
 	values = closeTierGroup.values
 	colors = cl.scales['3']['qual']['Pastel2']
 	data = [go.Pie(labels=labels, values=values,pull=.05, hole=.05, marker=dict(colors=colors, line=dict(width=2)))]
-	fig = go.Figure(data=data)
+	layout = go.Layout(
+		font=dict(size=15),
+	)
+	fig = go.Figure(data=data, layout=layout)
 	py.image.save_as(fig, filename='./output/closeReasonPlot.png')
 
 
@@ -383,12 +390,13 @@ def averageAgePlot(df):
 	]
 	layout = go.Layout(
 		width=700,
+		font=dict(size=18),	
 		yaxis=dict(
 		title='Days',
 		)
 	)
 	fig = go.Figure(data=data, layout=layout)
-	# py.image.save_as(fig, filename='./output/averageAgePlot.png')
+	py.image.save_as(fig, filename='./output/averageAgePlot.png')
 
 	#AGE TIER
 	ageTier = averageAge
@@ -418,6 +426,7 @@ def averageAgePlot(df):
 	]
 	layout = go.Layout(
 		width=700,
+		font=dict(size=15),	
 		yaxis=dict(
 		title='Days',
 		)
@@ -471,7 +480,7 @@ def initiateTech(FY):
 	FYTech = (FY[FY['Service Line Group'] == 'Technology'][FY['Close Period'] >= yearBegin]).copy()
 	return FYTech
 
-plots5 = [
+plots = [
  {"type":"pipe", "function": pipePlots, "category": "area", "desc": "Full Pipeline"},
  {"type":"sl", "function": slPlot, "category": "bar", "desc": "Service Lines"},
  {"type":"dealSize", "function": dealSizePlot, "category" : "pie", "desc": "Deal Size Tiers"},
@@ -481,11 +490,15 @@ plots5 = [
  {"type":"keyDeals", "function": keyDeals,  "category": "table", "desc": "Key Deals"}
 ]
 
-plots = [
- {"type":"summary", "function": summaryTable, "category": "table", "desc": "Full Pipeline" },
- {"type":"summary2", "function": summaryTable, "category": "pie", "desc": "Persuit Outcomes" },
- {"type":"summary3", "function": summaryTable, "category": "area" , "desc": "Summary Table" },
- {"type":"ageTier", "function": averageAgePlot, "category": "area", "desc": "Key Deals"},
+plots3= [
+ {"type":"summary", "function": summaryTable, "category": "table", "desc": "Summary Table" },
+ # {"type":"averageAge", "function": averageAgePlot,  "category": "bar",  "desc": "Entry Age"},
+
+ # {"type":"averageAge", "function": averageAgePlot,  "category": "bar",  "desc": "Entry Age"},
+#  {"type":"summary", "function": summaryTable, "category": "table", "desc": "Full Pipeline" },
+#  {"type":"summary2", "function": summaryTable, "category": "pie", "desc": "Persuit Outcomes" },
+#  {"type":"summary3", "function": summaryTable, "category": "area" , "desc": "Summary Table" },
+#  {"type":"ageTier", "function": averageAgePlot, "category": "area", "desc": "Key Deals"},
 ]
 
 global FY
