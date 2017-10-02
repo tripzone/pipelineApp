@@ -4,7 +4,8 @@ import { Router, Route, Link} from "react-router-dom";
 import { plotState } from "./state";
 import axios from "axios";
 import "./App.css";
-const serverLink = "http://127.0.0.1:5000"
+export const serverLink = "http://52.55.4.4:5000"
+// export const serverLink = "http://localhost:5000"
 
 
 class Setting extends React.Component {

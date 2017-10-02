@@ -17,6 +17,8 @@ yearBegin = '2018 - 01'
 yearEnd = '2018 - 13'
 dateTarget = '2017-12-01'
 
+staticPath= "./static/"
+
 def summaryTable(df):
 	def computeRow(df, SL, stage, period):
 		result = np.zeros(4)
@@ -39,14 +41,14 @@ def summaryTable(df):
 		return result
 
 	def printIt(SL, rows):
-		with open('./output/tableOut.csv','a') as file:
+		with open(staticPath+'tableOut.csv','a') as file:
 			file.write(SL+',')
 			for row in rows:
 				for cell in row:
 					file.write(str(cell)+',')
 			file.write('\n')
 	try:
-		os.remove('./output/tableOut.csv')
+		os.remove(staticPath+'tableOut.csv')
 	except:
 		pass
 
@@ -104,7 +106,7 @@ def pipePlots(df):
 		trace['name']= legends[i]
 
 	figure['data'].extend(targetFig['data'])
-	py.image.save_as(figure, filename='./output/allTech.png')
+	py.image.save_as(figure, filename=staticPath+'allTech.png')
 
 	# SECOND GRAPH
 	result = (result[result.index < NinetyDayEnd])
@@ -181,7 +183,7 @@ def pipePlots(df):
 
 	fig = go.Figure(data=data, layout=layout)
 	fig['data'].extend(targetFig['data'])
-	py.image.save_as(fig, filename='./output/90DayAll.png')
+	py.image.save_as(fig, filename=staticPath+'90DayAll.png')
 
 
 def keyDeals(dfTech ):
@@ -192,7 +194,7 @@ def keyDeals(dfTech ):
 	# keyDeals.dropna(inplace=True)
 	keyDealsClean = keyDeals[['Rational', 'Selected By','stage', 'Account', 'Opportunity', 'TR', 'line', 'Close Date', 'Category','90DayWindow?']].sort_values(by='Selected By')
 	# keyDealsClean = keyDeals[['Selected By','Rational', 'Category']].sort_values(by='Selected By')
-	# keyDealsClean.to_csv('./output/keydealsoutput.csv')
+	# keyDealsClean.to_csv(staticPath+'keydealsoutput.csv')
 
 	keyDealsGroup = keyDeals.groupby('Category').count()['TR']
 	data1 = [
@@ -216,7 +218,7 @@ def keyDeals(dfTech ):
 	)
 
 	fig1 = go.Figure(data=data1, layout=layout)
-	py.image.save_as(fig1, filename='./output/keyDealsRational.png')
+	py.image.save_as(fig1, filename=staticPath+'keyDealsRational.png')
 
 	#PLOT
 	ed = keyDealsRead.join(dfTech)
@@ -292,7 +294,7 @@ def keyDeals(dfTech ):
 	)
 
 	fig = go.Figure(data=data, layout=layout)
-	py.image.save_as(fig, filename='./output/90DayKeyDeals.png')
+	py.image.save_as(fig, filename=staticPath+'90DayKeyDeals.png')
 
 
 def slPlot(df):
@@ -318,7 +320,7 @@ def slPlot(df):
 		font=dict(size=18),
 	)
 	fig = go.Figure(data=data, layout=layout)
-	py.image.save_as(fig, filename='./output/SlsPlot.png')
+	py.image.save_as(fig, filename=staticPath+'SlsPlot.png')
 
 def dealSizePlot(df):
 	#DEAL SIZE
@@ -343,7 +345,7 @@ def dealSizePlot(df):
 		font=dict(size=15),
 	)
 	fig = go.Figure(data=data, layout=layout)
-	py.image.save_as(fig, filename='./output/dealSizePlot.png')
+	py.image.save_as(fig, filename=staticPath+'dealSizePlot.png')
 
 def closeReasonPlot(df):
 	closeTier = df[(df["stage"]==-2) | (df["stage"]==-1) | (df["stage"]==6)].copy()
@@ -360,7 +362,7 @@ def closeReasonPlot(df):
 		font=dict(size=15),
 	)
 	fig = go.Figure(data=data, layout=layout)
-	py.image.save_as(fig, filename='./output/closeReasonPlot.png')
+	py.image.save_as(fig, filename=staticPath+'closeReasonPlot.png')
 
 
 def averageAgePlot(df):
@@ -396,7 +398,7 @@ def averageAgePlot(df):
 		)
 	)
 	fig = go.Figure(data=data, layout=layout)
-	py.image.save_as(fig, filename='./output/averageAgePlot.png')
+	py.image.save_as(fig, filename=staticPath+'averageAgePlot.png')
 
 	#AGE TIER
 	ageTier = averageAge
@@ -432,11 +434,11 @@ def averageAgePlot(df):
 		)
 	)
 	fig = go.Figure(data=data, layout=layout)
-	py.image.save_as(fig, filename='./output/ageTierPlot.png')
+	py.image.save_as(fig, filename=staticPath+'ageTierPlot.png')
 
 def initiateDf():
-	# plotly.tools.set_credentials_file(username='kasrazahir', api_key='hvEWprL4cY9DDtgkhp3U')
-	plotly.tools.set_credentials_file(username='kasra.zahir', api_key='p04mrpvEHUM1994TQbbP')
+	plotly.tools.set_credentials_file(username='kasrazahir', api_key='hvEWprL4cY9DDtgkhp3U')
+	# plotly.tools.set_credentials_file(username='kasra.zahir', api_key='p04mrpvEHUM1994TQbbP')
 	global FY
 	FY = pd.read_excel("./uploads/data.xlsx").set_index('Id#')
 

@@ -2,8 +2,8 @@ import React, { Component } from "react";
 import { observer } from "mobx-react";
 import { plotState } from "./state";
 import "./App.css";
-
-const serverLink = "http://127.0.0.1:5000"
+import { serverLink } from "./Setting"
+// const serverLink = "http://127.0.0.1:5000"
 
 async function plotIt(type) {
 	return fetch(serverLink+"/makeplot", {

@@ -5,7 +5,6 @@ import { plotState } from "./state";
 // import Setting from "./Setting";
 import axios from "axios";
 import "./App.css";
-const serverLink = "http://127.0.0.1:5000"
 
 
 class App extends React.Component {
