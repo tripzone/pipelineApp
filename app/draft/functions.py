@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 import os.path
-from datetime import datetime, timedelta
+from datetime import datetime
 import plotly.graph_objs as go
 import plotly.plotly as py
 import colorlover as cl
@@ -9,18 +9,16 @@ import cufflinks as cf
 import xlrd, openpyxl
 import plotly
 
-# periodDate = datetime(2017, 11, 19, 0, 0)
-# beginningDate = datetime(2017, 6, 4, 0, 0)
-# thisPeriod = '2018 - 07'
-# NinetyDayEnd = '2018 - 10'
-# yearBegin = '2018 - 01'
-# yearEnd = '2018 - 13'
+periodDate = datetime(2017, 11, 18, 0, 0)
+beginningDate = datetime(2017, 6, 4, 0, 0)
+thisPeriod = '2018 - 07'
+NinetyDayEnd = '2018 - 10'
+yearBegin = '2018 - 01'
+yearEnd = '2018 - 13'
 
 staticPath= "./static/"
 
-
-
-def summaryTable(df, dt):
+def summaryTable(df):
 	def computeRow(df, SL, stage, period):
 		result = np.zeros(4)
 		temp = df[(df['Close Period'] == period) & (df['line'] == SL) & (df['stage'] == stage)]
@@ -33,10 +31,10 @@ def summaryTable(df, dt):
 
 	def computeNewOp(df, SL):
 		result = np.zeros(4)
-		temp = df[(df['Created'] >= dt["periodDate"]) & (df['line'] == SL)]
+		temp = df[(df['Created'] > periodDate) & (df['line'] == SL)]
 		result[0] = temp['TR'].sum()
 		result[1] = temp['TR'].count()
-		ytdTemp = df[(df['Created'] > dt["beginningDate"]) & (df['line'] == SL)]
+		ytdTemp = df[(df['Created'] > beginningDate) & (df['line'] == SL)]
 		result[2] = ytdTemp['TR'].sum()
 		result[3] = ytdTemp['TR'].count()
 		return result
@@ -58,15 +56,15 @@ def summaryTable(df, dt):
 	print(slines)
 	for line in np.sort(slines):
 		a = computeNewOp(df, line)
-		b = computeRow(df, line, 6, dt["thisPeriod"])
-		c = computeRow(df, line, -1, dt["thisPeriod"])
-		d = computeRow(df, line, -2, dt["thisPeriod"])
+		b = computeRow(df, line, 6, thisPeriod)
+		c = computeRow(df, line, -1, thisPeriod)
+		d = computeRow(df, line, -2, thisPeriod)
 		printIt(line,[a,b,c,d])
 
-	temp = df[df['Close Period'] <= dt["thisPeriod"]]
+	temp = df[df['Close Period'] <= thisPeriod]
 	print('outputted to file')
 
-def pipePlots(df, dt):
+def pipePlots(df):
 	# FIRST GRAPH
 	dfGroup = df.groupby(['Close Period','stage'])['TR'].sum().reset_index()
 	xVal=dfGroup['Close Period'].values
@@ -81,11 +79,11 @@ def pipePlots(df, dt):
 		result = pd.concat([result, df], axis=1)
 	result = result.reindex_axis(sorted(result.columns, reverse=True), axis=1)
 
-	resultFY = (result[result.index <= dt["yearEnd"]])
+	resultFY = (result[result.index <= yearEnd])
 	# resultFY.to_csv('1.pipeline.csv')
 
 	target = pd.read_csv("uploads/target.csv").set_index('date')
-	targetLocal = (target[target.index <= dt["yearEnd"]])
+	targetLocal = (target[target.index <= yearEnd])
 
 	# color_scale_blues = reversed(cl.scales['7']['seq']['Greens'])
 	# color_scale_blues =['#103834','#195953','#207068', '#629a95', '#bcd4d1', '#d2e2e0']
@@ -112,8 +110,8 @@ def pipePlots(df, dt):
 	py.image.save_as(figure, filename=staticPath+'allTech.png')
 
 	# SECOND GRAPH
-	result = (result[result.index <= dt["NinetyDayEnd"]])
-	targetHere = (target[target.index <= dt["NinetyDayEnd"]])
+	result = (result[result.index <= NinetyDayEnd])
+	targetHere = (target[target.index <= NinetyDayEnd])
 	opacityParam = 0.8
 
 	total = result.fillna(0)[3.0]+result.fillna(0)[4.0]+result.fillna(0)[5.0]+result.fillna(0)[6.0]
@@ -189,11 +187,11 @@ def pipePlots(df, dt):
 	py.image.save_as(fig, filename=staticPath+'90DayAll.png')
 
 
-def keyDeals(dfTech , dt):
+def keyDeals(dfTech ):
 	# TABLE
 	keyDealsRead = pd.read_csv("uploads/keydeals.csv").set_index('Id')
 	keyDeals = keyDealsRead.join(FY)
-	keyDeals['90DayWindow?'] = np.where(keyDeals['Close Period']<= dt["NinetyDayEnd"], 'TRUE', '' )
+	keyDeals['90DayWindow?'] = np.where(keyDeals['Close Period']<= NinetyDayEnd, 'TRUE', '' )
 	# keyDeals.dropna(inplace=True)
 	keyDealsClean = keyDeals[['Rational', 'Selected By','stage', 'Account', 'Opportunity', 'TR', 'line', 'Close Date', 'Category','90DayWindow?']].sort_values(by='Selected By')
 	# keyDealsClean = keyDeals[['Selected By','Rational', 'Category']].sort_values(by='Selected By')
@@ -237,9 +235,9 @@ def keyDeals(dfTech , dt):
 		result = pd.concat([result, df], axis=1)
 	result = result.reindex_axis(sorted(result.columns, reverse=True), axis=1)
 
-	resultHere = (result[result.index <= dt["NinetyDayEnd"]])
+	resultHere = (result[result.index <= NinetyDayEnd])
 
-	result = (result[result.index <= dt["NinetyDayEnd"]])
+	result = (result[result.index <= NinetyDayEnd])
 	opacityParam = 0.8
 
 	total = result.fillna(0)[3.0]+result.fillna(0)[4.0]+result.fillna(0)[5.0]
@@ -300,8 +298,8 @@ def keyDeals(dfTech , dt):
 	py.image.save_as(fig, filename=staticPath+'90DayKeyDeals.png')
 
 
-def slPlot(df, dt):
-	SLTotal = df[(df['stage'] != [-2]) & (df['stage'] != [-1]) &(df['Close Period'] <= dt["NinetyDayEnd"])].groupby('line').sum()['TR']
+def slPlot(df):
+	SLTotal = df[(df['stage'] != [-2]) & (df['stage'] != [-1]) &(df['Close Period'] <= NinetyDayEnd)].groupby('line').sum()['TR']
 	# SLTotal.to_csv('2.sls.csv')
 
 	data = [
@@ -325,11 +323,11 @@ def slPlot(df, dt):
 	fig = go.Figure(data=data, layout=layout)
 	py.image.save_as(fig, filename=staticPath+'SlsPlot.png')
 
-def dealSizePlot(df, dt):
+def dealSizePlot(df):
 	#DEAL SIZE
 	tiers = ['0M-1M', '1M-5M', '5M-10M', '10M+']
 
-	sizeTier = df[(df['stage'] != [-2]) & (df['stage'] != [-1]) & (df['Close Period'] <= dt["NinetyDayEnd"])].copy()
+	sizeTier = df[(df['stage'] != [-2]) & (df['stage'] != [-1]) & (df['Close Period'] <= NinetyDayEnd)].copy()
 	sizeTier['size'] = np.where(sizeTier['TR']<=1000000, tiers[0],
 								np.where(sizeTier['TR']<=5000000, tiers[1],
 										np.where(sizeTier['TR']<=10000000, tiers[2], tiers[3])))
@@ -350,9 +348,9 @@ def dealSizePlot(df, dt):
 	fig = go.Figure(data=data, layout=layout)
 	py.image.save_as(fig, filename=staticPath+'dealSizePlot.png')
 
-def closeReasonPlot(df, dt):
+def closeReasonPlot(df):
 	closeTier = df[(df["stage"]==-2) | (df["stage"]==-1) | (df["stage"]==6)].copy()
-	closeTier = closeTier[closeTier['Close Period'] <= dt["NinetyDayEnd"]]
+	closeTier = closeTier[closeTier['Close Period'] <= NinetyDayEnd]
 	closeTier.replace({"stage": {6.0:'Sold', -2:'Abandoned' , -1:'Lost'}}, inplace= True)
 	closeTierGroup = closeTier.groupby('stage').sum()['TR']
 	# closeTierGroup.to_csv('4.closeReason.csv')
@@ -368,10 +366,10 @@ def closeReasonPlot(df, dt):
 	py.image.save_as(fig, filename=staticPath+'closeReasonPlot.png')
 
 
-def averageAgePlot(df, dt):
+def averageAgePlot(df):
 	#AVERAGE AGE
 	averageAge = (df[(df["stage"]!= -2) & (df["stage"]!= -1) & (df["stage"]!=6)]).copy()
-	averageAge = averageAge[averageAge['Close Period'] <= dt["NinetyDayEnd"]]
+	averageAge = averageAge[averageAge['Close Period'] <= NinetyDayEnd]
 
 	now = datetime.now()
 	averageAge['age'] = (now - averageAge['Created'])/np.timedelta64(1, 'D')
@@ -437,8 +435,8 @@ def averageAgePlot(df, dt):
 	py.image.save_as(fig, filename=staticPath+'ageTierPlot.png')
 
 def initiateDf():
-	# plotly.tools.set_credentials_file(username='kasrazahir', api_key='hvEWprL4cY9DDtgkhp3U')
-	plotly.tools.set_credentials_file(username='kasra.zahir', api_key='p04mrpvEHUM1994TQbbP')
+	plotly.tools.set_credentials_file(username='kasrazahir', api_key='hvEWprL4cY9DDtgkhp3U')
+	# plotly.tools.set_credentials_file(username='kasra.zahir', api_key='p04mrpvEHUM1994TQbbP')
 	global FY
 	FY = pd.read_excel("./uploads/data.xlsx").set_index('Id#')
 
@@ -477,12 +475,12 @@ def initiateDf():
 
 	return FY
 
-def initiateTech(FY, dt):
+def initiateTech(FY):
 	global FYTech
-	FYTech = (FY[FY['Service Line Group'] == 'Technology'][FY['Close Period'] >= dt["yearBegin"]]).copy()
+	FYTech = (FY[FY['Service Line Group'] == 'Technology'][FY['Close Period'] >= yearBegin]).copy()
 	return FYTech
 
-plots = [
+plots5 = [
  {"type":"pipe", "function": pipePlots, "category": "area", "desc": "Full Pipeline"},
  {"type":"sl", "function": slPlot, "category": "bar", "desc": "Service Lines"},
  {"type":"dealSize", "function": dealSizePlot, "category" : "pie", "desc": "Deal Size Tiers"},
@@ -492,7 +490,7 @@ plots = [
  {"type":"keyDeals", "function": keyDeals,  "category": "table", "desc": "Key Deals"}
 ]
 
-plots4 = [
+plots = [
  # {"type":"summary", "function": pipePlots, "category": "table", "desc": "Summary Table" },
  # {"type":"averageAge", "function": averageAgePlot,  "category": "bar",  "desc": "Entry Age"},
 
@@ -504,31 +502,8 @@ plots4 = [
 ]
 
 def plotIt(type):
-	# db.csv has the year and month of this period
-	dateDf = pd.read_csv(staticPath+"db.csv",index_col=[0])
-	yearValue = dateDf['thisPeriodYear'].values[0]
-	monthValue = dateDf['thisPeriodMonth'].values[0]
-	yearBegin = str(yearValue)+" - 01"
-	yearEnd = str(yearValue)+" - 13"
-	if( monthValue > 9 ):
-		thisPeriod = str(yearValue)+" - "+str(monthValue)
-	else:
-		thisPeriod = str(yearValue)+" - 0"+str(monthValue)
-
-	if (monthValue > 6):
-		NinetyDayEnd = str(yearValue)+" - "+str(monthValue+3)
-	else:
-		NinetyDayEnd = str(yearValue)+" - 0"+str(monthValue+3)
-	beginningDate = datetime(2017, 6, 4, 0, 0)+timedelta(days=int(364*(yearValue-2018)))
-	periodDate = beginningDate + timedelta(days=int(28*(monthValue-1)))
-
-	dt = {"yearBegin":yearBegin, "yearEnd":yearEnd,"thisPeriod":thisPeriod,"NinetyDayEnd":NinetyDayEnd,"beginningDate":beginningDate,"periodDate":periodDate}
-	print("Setting Dates:", dt)
-
 	global FY
 	FY = initiateDf()
 	global FYTech
-	FYTech = initiateTech(FY, dt)
-	list(filter(lambda x : x['type'] == type, plots))[0]['function'](FYTech, dt)
-
-plotIt("summary")
+	FYTech = initiateTech(FY)
+	list(filter(lambda x : x['type'] == type, plots))[0]['function'](FYTech)

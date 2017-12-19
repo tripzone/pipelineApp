@@ -1,20 +1,17 @@
 import React, { Component } from "react";
 import { observer } from "mobx-react";
 import { Router, Route, Link} from "react-router-dom";
-import { plotState } from "./state";
+// import { plotState } from "./state";
 import axios from "axios";
 import "./App.css";
-export const serverLink = "http://52.55.4.4:5000"
-// export const serverLink = "http://localhost:5000"
-
+export const serverLink = "http://localhost:5000"
 
 class Setting extends React.Component {
 
 	constructor(props) {
 		super(props);
-		this.state = {file: new FormData()};
+		this.state = {file: new FormData(), thisPeriodYear: "2018", thisPeriodMonth:"7"};
 		this.handleSubmit = this.handleSubmit.bind(this);
-
 	}
 	handleFileUpload(e,  stateFile) {
 		let data = new FormData();
@@ -22,9 +19,9 @@ class Setting extends React.Component {
 	}
 
 	handleSubmit() {
-
-		console.log('here bro')
-		axios.post(serverLink+ '/file', this.state.file)
+		axios.post(serverLink+ '/file', this.state.file, {
+		    headers: { thisPeriodYear: this.state.thisPeriodYear, thisPeriodMonth: this.state.thisPeriodMonth }
+		})
 	      .then(response => 
 	      	this.props.history.push('/load')
 	      )
@@ -58,6 +55,8 @@ class Setting extends React.Component {
    						<button className="waves-effect waves-light btn-large" onClick={e => this.handleSubmit(this.state.file)} >upload</button>
    					</div>
    				</div>
+   				*Line up Date
+
         	</div>
 
 

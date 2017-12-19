@@ -22,13 +22,14 @@ export let plotState = observable({
 	"plots" : []
 });
 plotState.init = function(plotTypes) {
-	this.loaded = true;
+	this.plots=[];
 	plotTypes.forEach(x=>{
 		this.plots.push(new plot(x.type, x.category, x.desc))
 	})
+	this.loaded = true;
 };
 plotState.loadPlot = function(type){
-	this.plots[this.plots.findIndex(x=>x.type ==type)].loaded = true;
+	this.plots[this.plots.findIndex(x=>x.type == type)].loaded = true;
 }
 plotState.loadError = function(type){
 	this.plots[this.plots.findIndex(x=>x.type ==type)].loaded = true;

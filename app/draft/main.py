@@ -4,7 +4,6 @@ from flask import Flask, send_file, request, redirect, jsonify
 # from flask_cors import CORS
 import functions as fn
 from flask_cors import CORS
-import pandas as pd
 
 app = Flask(__name__)
 CORS(app)
@@ -24,11 +23,8 @@ def allowed_file(filename):
 @app.route('/file', methods=['POST'])
 def upload_file():
     if request.method == 'POST':
-        thisPeriod = {"thisPeriodYear": request.headers.get('thisPeriodYear'), "thisPeriodMonth": request.headers.get('thisPeriodMonth')}
-        dateDf = pd.DataFrame(thisPeriod, index=['date'])
-        dateDf.to_csv("./static/db.csv")
-        print('Save this period to:', thisPeriod)
-
+        thisPeriod = request.headers.get('thisPeriod')
+        print('heading now', thisPeriod)
         # check if the post request has the file part
         if 'file' not in request.files:
             print('No file part')
@@ -45,6 +41,8 @@ def upload_file():
             file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
             global FY
             FY = fn.initiateDf()
+            global FYTech
+            FYTech = fn.initiateTech(FY)
             return json.dumps({'success':True}), 200, {'ContentType':'application/json'}
 
 @app.route('/makeplot', methods=['GET'])

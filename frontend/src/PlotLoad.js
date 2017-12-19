@@ -3,7 +3,7 @@ import { observer } from "mobx-react";
 import { plotState } from "./state";
 import "./App.css";
 import { serverLink } from "./Setting"
-// const serverLink = "http://127.0.0.1:5000"
+import { Router, Route, Link} from "react-router-dom";
 
 async function plotIt(type) {
 	return fetch(serverLink+"/makeplot", {
@@ -94,7 +94,7 @@ class App extends Component {
 		};
 
 		requests()
-			.then(x => console.log("all good bro", x))
+			.then(x => console.log("all good", x))
 			.catch(x => console.log("no good", x));
 	}
 
@@ -115,6 +115,12 @@ class App extends Component {
 					</div>
 					<div className="row">
 						{plotState.plots.map(x=><div className="col s6 m4 l2 loading_plot center"><LoadingPlot key={x.name} loadedState={x.loaded} category={x.category} loaderror={x.error} desc={x.desc} /></div>)}
+					</div>
+					<div className="row">
+						{plotState.plots.map(x=>x.loaded).reduce((y,x)=>x&&y) ?
+							<div className="row center">
+			   				   	<Link to="./" className="btn-large waves-effect waves-light navy ">Back to Charts</Link>
+			   				</div> : null}
 					</div>
 				</div>
 			);
