@@ -5,13 +5,6 @@ ENV STATIC_INDEX 1
 # ENV STATIC_INDEX 0
 
 COPY ./app /app
-RUN pip install numpy
-RUN pip install pandas
-RUN pip install  datetime
-RUN pip install colorlover
-RUN pip install IPython
-RUN pip install plotly
-RUN pip install cufflinks
-RUN pip install xlrd
-RUN pip install openpyxl
-RUN pip install flask_cors
+COPY ./requirements.txt /app
+WORKDIR /app
+RUN pip install -r requirements.txt

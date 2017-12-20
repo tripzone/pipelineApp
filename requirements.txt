@@ -1,0 +1,10 @@
+numpy
+pandas
+datetime
+colorlover
+IPython
+plotly
+cufflinks
+xlrd
+openpyxl
+flask_cors
