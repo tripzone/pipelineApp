@@ -443,13 +443,13 @@ def initiateDf():
 	FY = pd.read_excel("./uploads/data.xlsx").set_index('Id#')
 
 	columns = [
-		'Service',
-		'Service Line Group',
-		'Service Line',
+		'Market Offering Category',
+		'Market Offering Solution',
+		'Market Offering',
 		'Sales Stage',
 		'Close Date',
 		'Close Period',
-		'Total Estimated Revenue',
+		'Total Est. Engagement Revenue',
 		'Created',
 		'Account',
 		'Opportunity',
@@ -458,7 +458,7 @@ def initiateDf():
 	   ]
 
 	FY = FY[columns]
-	FY.rename(columns={'Total Estimated Revenue': 'TR', 'Sales Stage':'stage'}, inplace=True)
+	FY.rename(columns={'Total Est. Engagement Revenue': 'TR', 'Sales Stage':'stage'}, inplace=True)
 
 	# FY['TR'] = FY['TR'].str.replace(r'[$,]', '').astype('float')
 	FY['stage'] = FY['stage'].map(lambda x: str(x)[:2])
@@ -467,24 +467,24 @@ def initiateDf():
 	FY['stage'] = FY['stage'].replace(7, -1)
 	FY['Created'] = pd.to_datetime(FY['Created'])
 	FY['Last Updated'] = pd.to_datetime(FY['Last Updated'])
-	FY.loc[FY['Service Line']=='Oracle', 'line']='Oracle'
-	FY.loc[FY['Service Line']=='SAP', 'line']='SAP'
-	FY.loc[FY['Service Line']=='Digital Customer', 'line']='DC'
-	FY.loc[FY['Service Line']=='Analytics & Information Mgmt', 'line']='AIM'
-	FY.loc[FY['Service Line']=='Digital Integration', 'line']='DI'
-	FY.loc[FY['Service Line']=='Application ManagementServices', 'line']='AMS'
-	FY.loc[FY['Service Line'].str.split('-').str[0] =='TSA ', 'line']='TS&A'
-
+	FY.loc[FY['Market Offering']=='Oracle', 'line']='Oracle'
+	FY.loc[FY['Market Offering']=='SAP', 'line']='SAP'
+	FY.loc[FY['Market Offering']=='Digital Customer', 'line']='DC'
+	FY.loc[FY['Market Offering']=='Analytics & Information Mgmt', 'line']='AIM'
+	FY.loc[FY['Market Offering']=='Digital Integration', 'line']='DI'
+	FY.loc[FY['Market Offering']=='Application ManagementServices', 'line']='AMS'
+	FY.loc[FY['Market Offering'].str.split('-').str[0] =='TSA ', 'line']='TS&A'
+	FY.loc[FY['Market Offering'].str.split('-').str[0] =='TSA', 'line']='TS&A'
 	return FY
 
 def initiateTech(FY, dt):
 	global FYTech
-	FYTech = (FY[FY['Service Line Group'] == 'Technology'][FY['Close Period'] >= dt["yearBegin"]]).copy()
+	FYTech = (FY[FY['Market Offering Solution'] == 'Technology'][FY['Close Period'] >= dt["yearBegin"]]).copy()
 	return FYTech
 
 plots = [
  {"type":"pipe", "function": pipePlots, "category": "area", "desc": "Full Pipeline"},
- {"type":"sl", "function": slPlot, "category": "bar", "desc": "Service Lines"},
+ {"type":"sl", "function": slPlot, "category": "bar", "desc": "Market Offerings"},
  {"type":"dealSize", "function": dealSizePlot, "category" : "pie", "desc": "Deal Size Tiers"},
  {"type":"closeReason", "function": closeReasonPlot, "category": "pie", "desc": "Persuit Outcomes"},
  {"type":"averageAge", "function": averageAgePlot,  "category": "bar",  "desc": "Entry Age"},
@@ -495,6 +495,7 @@ plots = [
 plots4 = [
  # {"type":"summary", "function": pipePlots, "category": "table", "desc": "Summary Table" },
  # {"type":"averageAge", "function": averageAgePlot,  "category": "bar",  "desc": "Entry Age"},
+ {"type":"sl", "function": slPlot, "category": "bar", "desc": "Market Offerings"},
 
  # {"type":"averageAge", "function": averageAgePlot,  "category": "bar",  "desc": "Entry Age"},
  {"type":"summary", "function": summaryTable, "category": "table", "desc": "Full Pipeline" },

@@ -40,7 +40,6 @@ def upload_file():
 			filename = "data.xlsx"
 			file.save(os.path.join(app.config["UPLOAD_FOLDER"], filename))
 			FY = fn.initiateDf()
-			fn.initiateTech(FY)
 			return json.dumps({"success":True}), 200, {"ContentType":"application/json"}
 
 @app.route("/makeplot", methods=["GET"])
