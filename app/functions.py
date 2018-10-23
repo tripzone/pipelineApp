@@ -33,7 +33,7 @@ def summaryTable(df, dt):
 
 	def computeNewOp(df, SL):
 		result = np.zeros(4)
-		temp = df[(df['Created'] >= dt["periodDate"]) & (df['line'] == SL)]
+		temp = df[(df['Created'] >= dt["periodDate"]) & (df['Created'] < dt["periodEndDate"]) & (df['line'] == SL)]
 		result[0] = temp['TR'].sum()
 		result[1] = temp['TR'].count()
 		ytdTemp = df[(df['Created'] > dt["beginningDate"]) & (df['line'] == SL)]
@@ -112,8 +112,10 @@ def pipePlots(df, dt):
 	py.image.save_as(figure, filename=staticPath+'allTech.png')
 
 	# SECOND GRAPH
-	result = (result[result.index <= dt["NinetyDayEnd"]])
-	targetHere = (target[target.index <= dt["NinetyDayEnd"]])
+	# result = (result[result.index <= dt["NinetyDayEnd"]])
+	# targetHere = (target[target.index <= dt["NinetyDayEnd"]])
+	result = (result[result.index <= dt["thisPeriod"]])
+	targetHere = (target[target.index <= dt["thisPeriod"]])
 	opacityParam = 0.8
 
 	total = result.fillna(0)[3.0]+result.fillna(0)[4.0]+result.fillna(0)[5.0]+result.fillna(0)[6.0]
@@ -301,7 +303,9 @@ def keyDeals(dfTech , dt):
 
 
 def slPlot(df, dt):
-	SLTotal = df[(df['stage'] != [-2]) & (df['stage'] != [-1]) &(df['Close Period'] <= dt["NinetyDayEnd"])].groupby('line').sum()['TR']
+	SLTotal = df[(df['stage'] != [-2]) & (df['stage'] != [-1]) &(df['Close Period'] <= dt["yearEnd"])].groupby('line').sum()['TR']
+	# SLTotal = df[(df['stage'] != [-2]) & (df['stage'] != [-1]) &(df['Close Period'] <= dt["NinetyDayEnd"])].groupby('line').sum()['TR']
+
 	# SLTotal.to_csv('2.sls.csv')
 
 	data = [
@@ -321,6 +325,9 @@ def slPlot(df, dt):
 	layout = go.Layout(
 		width=700,
 		font=dict(size=18),
+		yaxis=dict(
+			title='Revenue',
+		)
 	)
 	fig = go.Figure(data=data, layout=layout)
 	py.image.save_as(fig, filename=staticPath+'SlsPlot.png')
@@ -329,7 +336,9 @@ def dealSizePlot(df, dt):
 	#DEAL SIZE
 	tiers = ['0M-1M', '1M-5M', '5M-10M', '10M+']
 
-	sizeTier = df[(df['stage'] != [-2]) & (df['stage'] != [-1]) & (df['Close Period'] <= dt["NinetyDayEnd"])].copy()
+	# sizeTier = df[(df['stage'] != [-2]) & (df['stage'] != [-1]) & (df['Close Period'] <= dt["NinetyDayEnd"])].copy()
+	sizeTier = df[(df['stage'] != [-2]) & (df['stage'] != [-1]) & (df['Close Period'] <= dt["yearEnd"])].copy()
+
 	sizeTier['size'] = np.where(sizeTier['TR']<=1000000, tiers[0],
 								np.where(sizeTier['TR']<=5000000, tiers[1],
 										np.where(sizeTier['TR']<=10000000, tiers[2], tiers[3])))
@@ -352,7 +361,9 @@ def dealSizePlot(df, dt):
 
 def closeReasonPlot(df, dt):
 	closeTier = df[(df["stage"]==-2) | (df["stage"]==-1) | (df["stage"]==6)].copy()
-	closeTier = closeTier[closeTier['Close Period'] <= dt["NinetyDayEnd"]]
+	# closeTier = closeTier[closeTier['Close Period'] <= dt["NinetyDayEnd"]]
+	closeTier = closeTier[closeTier['Close Period'] <= dt["yearEnd"]]
+
 	closeTier.replace({"stage": {6.0:'Sold', -2:'Abandoned' , -1:'Lost'}}, inplace= True)
 	closeTierGroup = closeTier.groupby('stage').sum()['TR']
 	# closeTierGroup.to_csv('4.closeReason.csv')
@@ -371,7 +382,9 @@ def closeReasonPlot(df, dt):
 def averageAgePlot(df, dt):
 	#AVERAGE AGE
 	averageAge = (df[(df["stage"]!= -2) & (df["stage"]!= -1) & (df["stage"]!=6)]).copy()
-	averageAge = averageAge[averageAge['Close Period'] <= dt["NinetyDayEnd"]]
+	# averageAge = averageAge[averageAge['Close Period'] <= dt["NinetyDayEnd"]]
+	averageAge = averageAge[averageAge['Close Period'] <= dt["yearEnd"]]
+
 
 	now = datetime.now()
 	averageAge['age'] = (now - averageAge['Created'])/np.timedelta64(1, 'D')
@@ -397,7 +410,7 @@ def averageAgePlot(df, dt):
 		width=700,
 		font=dict(size=18),	
 		yaxis=dict(
-		title='Days',
+			title='Days',
 		)
 	)
 	fig = go.Figure(data=data, layout=layout)
@@ -432,6 +445,9 @@ def averageAgePlot(df, dt):
 	layout = go.Layout(
 		width=700,
 		font=dict(size=15),	
+		yaxis=dict(
+			title='Revenue',
+		)
 	)
 	fig = go.Figure(data=data, layout=layout)
 	py.image.save_as(fig, filename=staticPath+'ageTierPlot.png')
@@ -489,7 +505,7 @@ plots = [
  {"type":"closeReason", "function": closeReasonPlot, "category": "pie", "desc": "Persuit Outcomes"},
  {"type":"averageAge", "function": averageAgePlot,  "category": "bar",  "desc": "Entry Age"},
  {"type":"summary", "function": summaryTable, "category": "table", "desc": "Summary Table" },
- {"type":"keyDeals", "function": keyDeals,  "category": "table", "desc": "Key Deals"}
+ # {"type":"keyDeals", "function": keyDeals,  "category": "table", "desc": "Key Deals"}
 ]
 
 plots4 = [
@@ -522,8 +538,9 @@ def plotIt(type):
 		NinetyDayEnd = str(yearValue)+" - 0"+str(monthValue+3)
 	beginningDate = datetime(2017, 6, 4, 0, 0)+timedelta(days=int(364*(yearValue-2018)))
 	periodDate = beginningDate + timedelta(days=int(28*(monthValue-1)))
+	periodEndDate = beginningDate + timedelta(days=int(28*(monthValue)))
 
-	dt = {"yearBegin":yearBegin, "yearEnd":yearEnd,"thisPeriod":thisPeriod,"NinetyDayEnd":NinetyDayEnd,"beginningDate":beginningDate,"periodDate":periodDate}
+	dt = {"yearBegin":yearBegin, "yearEnd":yearEnd,"thisPeriod":thisPeriod,"NinetyDayEnd":NinetyDayEnd,"beginningDate":beginningDate,"periodDate":periodDate, "periodEndDate":periodEndDate}
 	print("Setting Dates:", dt)
 
 	global FY

@@ -17,6 +17,7 @@ def home():
 UPLOAD_FOLDER = "./uploads"
 ALLOWED_EXTENSIONS = set(["xlsx"])
 app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
+print('version 2.1')
 
 def allowed_file(filename):
 	return "." in filename and \

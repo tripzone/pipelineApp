@@ -2,9 +2,13 @@
 /app/__pycache__/
 /private
 /uploads
+/site-packages
+*/site-packages/*
+/lib
 app/uploads/
 app/output/
 .ipynb_checkpoints/
 node_modules/
 *.png
 *.csv
+.DS_Store

@@ -5,6 +5,7 @@ import { Router, Route, Link} from "react-router-dom";
 import axios from "axios";
 import "./App.css";
 export const serverLink = "http://localhost:5001"
+export const fileLink = serverLink+"/static"
 
 class Setting extends React.Component {
 
